@@ -41,7 +41,7 @@ void payload()
 {
 	struct thread *td;
 
-	// Relys and SonyUSA-- yay!
+	// Clean your room!
 	_springcleaning();
 	
 	// Switch back to kernel GS base
